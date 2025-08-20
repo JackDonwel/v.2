@@ -1,90 +1,132 @@
-FrostLocker Simulation
+FrostLocker Ransomware Simulator
 
+Author: (donwell) Red Team
 Version: 1.0
-Author: Jack Donwel
-License: Educational / Simulation Use Only
-
+Classification: FOR AUTHORIZED LAB USE ONLY
 Overview
 
-frostlocker_sim.py is a ransomware simulation designed for safe, educational purposes. It demonstrates common ransomware behaviors, such as file “encryption”, persistence, and ransom note generation, without causing real harm to files or systems.
+FrostLocker is a simulated ransomware payload designed for red team engagements and cybersecurity awareness training. It mimics the behaviors of real-world ransomware—including file encryption, persistence, and extortion—in a safe, reversible, and controlled manner within an isolated lab environment.
 
-This project is intended for cybersecurity training, awareness, and lab exercises only.
+This tool is intended to demonstrate the impact of a successful phishing attack and to train blue teams on detection, response, and recovery procedures.
+⚠️ Critical Disclaimer
 
-Features
+THIS SOFTWARE IS DESIGNED STRICTLY FOR AUTHORIZED EDUCATIONAL AND PENETRATION TESTING PURPOSES.
 
-Simulates file encryption by renaming files with a .frostlocked extension.
+    Do not run this on any system without explicit, written authorization.
 
-Creates a dummy ransom note in the target directory.
+    Do not run this on any system that is not a fully isolated virtual machine (VM).
 
-Demonstrates persistence techniques by adding itself to the Windows startup registry.
+    Do not use this tool for any malicious, illegal, or unethical activities.
 
-Simulates exfiltration of basic system information to a mock C2 server.
+    The authors assume no liability for any damage caused by misuse of this software.
 
-Can be run safely in a controlled lab environment.
+By proceeding, you acknowledge that you are solely responsible for its use and any consequences.
+Features Simulated
 
-Configuration
-Target Directory
+    Social Engineering: Masquerades as a legitimate PDF invoice.
 
-By default, the simulation targets:
+    Privilege Escalation: Requests UAC admin privileges to execute its payload.
 
-    TARGET_DIR = "C:\\simulation_target\\"
+    Persistence: Adds itself to the Windows Registry Run key to survive reboots.
 
-  ⚠️ Important: Only use a safe folder in a lab environment. Do not point this to real system or personal files.
+    Data Exfiltration Beacon: Attempts to call out to a simulated Command & Control (C2) server.
 
-Target File Types
+    File "Encryption": Safely simulates file encryption by appending a .frostlocked extension to target files within a designated directory.
 
-The simulation only “encrypts” files with the following extensions:
+    Ransom Note: Drops and displays a realistic ransom note (!!!_READ_ME_!!!.txt).
 
-      TARGET_EXTENSIONS = ['.txt', '.docx', '.xlsx', '.jpg', '.png', '.sim']
+    Inhibits Recovery: Attempts to delete Volume Shadow Copies to prevent easy restoration.
 
-Requirements
+Prerequisites & Lab Setup
 
-    Python 3.8+
+    Isolated Lab Environment: A virtualized Windows 11 machine (e.g., in VirtualBox or VMware) with no network connection to your host or primary network.
 
-    Windows operating system (simulation uses Windows-specific APIs)
+    Target Directory: Create a dedicated folder for the simulation to act upon:
+    text
 
-    Python libraries:
+C:\simulation_target\
 
-pip install pycryptodome requests
+Python (for Building): On your build machine (e.g., Kali Linux), ensure Python 3.x is installed along with required libraries:
+bash
 
-Usage
+    pip install pycryptodome pyinstaller requests
 
-    Open a command prompt or PowerShell as administrator.
+Installation & Deployment
 
-    Navigate to the directory containing frostlocker_sim.py.
+    Build the Payload:
 
-    Run the simulation:
+        Save the provided Python script as frostlocker_sim.py.
 
-python frostlocker_sim.py
+        Compile it into a standalone executable:
+        bash
 
-    The script will create the target folder if it does not exist.
+        pyinstaller --onefile --noconsole frostlocker_sim.py
 
-    It will generate sample files for “encryption”.
+        The resulting executable will be in the ./dist/ folder.
 
-    A simulated ransom note will appear after files are processed.
+    Prepare the Decoy:
 
-Safety Notice
+        Rename the compiled .exe file to something convincing (e.g., Invoice_INV-7842.pdf.exe).
 
-    This script is completely safe when used in a controlled lab environment.
+    Deliver the Payload:
 
-    No real files outside the configured target directory will be affected.
+        Transfer the executable to the isolated Windows 11 VM (e.g., via a shared folder or virtual CD-ROM).
 
-    Do not use this on production systems, personal documents, or network shares.
+Execution & Simulation
 
-    This project is for educational and research purposes only.
+    On the target Windows VM, double-click the Invoice_INV-7842.pdf.exe file.
 
-Converting to an Executable
+    When the User Account Control (UAC) prompt appears, click "Yes". This is a critical step that simulates a user granting the attack elevated privileges.
 
-You can convert the script into a standalone Windows executable using PyInstaller:
+    Observe the simulation:
 
-    pip install pyinstaller
-    pyinstaller --onefile frostlocker_sim.py
+        Files in C:\simulation_target\ will be renamed with a .frostlocked extension.
 
-The executable will be located in the dist folder. Always test in a safe lab environment.
+        A ransom note will pop up on the screen.
+
+        The payload will be added to the startup registry.
+
+Recovery & Cleanup
+
+Since this is a simulation, recovery is straightforward.
+
+Method 1: Revert VM Snapshot (Recommended)
+
+    The fastest and cleanest method is to revert the virtual machine to a snapshot taken before the simulation.
+
+Method 2: Manual Cleanup
+
+    Boot into Safe Mode.
+
+    Remove Persistence:
+
+        Press Win + R, type regedit, and navigate to:
+        HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Run
+
+        Delete the value named WindowsSecurityUpdate.
+
+    Restore Files:
+
+        Navigate to C:\simulation_target\.
+
+        Manually rename all files, removing the .frostlocked extension.
+
+Detection Points (For Blue Teams)
+
+This simulation is designed to trigger common security controls. Look for:
+
+    Network: Outbound HTTP POST requests to unknown domains.
+
+    Endpoint: Process execution from unusual locations (e.g., Downloads, Temp).
+
+    Registry: Modification of the HKCU\...\Run key.
+
+    File System: Mass renaming of files with a new extension.
+
+    System: The vssadmin delete shadows command being executed.
+
 License
 
-This project is for educational use only. Redistribution or use for malicious purposes is strictly prohibited.
+This project is licensed for educational use only. Redistribution is prohibited without explicit permission.
 
-License
-
-This project is for educational use only. Redistribution or use for malicious purposes is strictly prohibited.
+Remember: Ethical hacking is a powerful skill. Always use it responsibly, legally, and with permission.
